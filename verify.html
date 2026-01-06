@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ověření - Kačenka</title>
+  <link rel="stylesheet" href="style-clean.css" />
+</head>
+<body>
+  <div class="bg-paper"></div>
+  <main class="page">
+    <div class="modal">
+      <h1>Ale počkej počkej...</h1>
+      <p class="sub">Jsi opravdu Káťa?</p>
+
+      <form id="verify-form" class="verify-form">
+        <div class="field">
+          <label for="birth">Kdy ses narodila?</label>
+          <input id="birth" name="birth" type="date" required value="2009-01-30" />
+        </div>
+
+        <div class="field">
+          <label for="together">A kdy jsme spolu začali chodit?</label>
+          <input id="together" name="together" type="date" required value="2025-04-29" />
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Potvrdit</button>
+          <a href="index.html" class="btn btn-ghost">Zpět</a>
+        </div>
+
+        <p id="verify-hint" class="sub verify-hint"></p>
+      </form>
+    </div>
+  </main>
+
+  <script src="verify.js"></script>
+</body>
+</html>

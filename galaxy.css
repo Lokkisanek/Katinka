@@ -1,0 +1,116 @@
+:root {
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Quicksand", "Segoe UI", sans-serif;
+  color: #fff6ff;
+  background: radial-gradient(circle at 20% 20%, #080314 0%, #010007 40%, #000000 90%);
+  overflow: hidden;
+}
+
+#galaxy-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  background: transparent;
+}
+
+.hud {
+  position: fixed;
+  bottom: 3rem;
+  left: 3rem;
+  z-index: 2;
+  max-width: 460px;
+  color: #f8e8ff;
+  pointer-events: none;
+}
+
+.hud-inner {
+  background: rgba(7, 5, 16, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 24px 28px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+}
+
+.eyebrow {
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #fbb6d7;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-family: "DM Serif Display", serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 1.1;
+  margin: 0 0 0.6rem;
+}
+
+.lede {
+  margin: 0 0 1.5rem;
+  color: #d8cbe9;
+  font-size: 1.05rem;
+}
+
+.hud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  pointer-events: all;
+}
+
+.hud-actions button,
+.hud-actions .btn-secondary {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+#pulse-btn {
+  background: radial-gradient(circle, #ffb3df 0%, #ff4fab 60%, #cc2f80 100%);
+  color: #14030f;
+  box-shadow: 0 12px 32px rgba(255, 79, 171, 0.35);
+}
+
+#pulse-btn:hover { transform: translateY(-4px) scale(1.02); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #ffe6ff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.btn-secondary:hover { transform: translateY(-4px); }
+
+.hint {
+  margin-top: 0.9rem;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .hud { left: 1.2rem; right: 1.2rem; bottom: 1.5rem; }
+  .hud-inner { padding: 20px; }
+  .hud-actions { flex-direction: column; }
+  .hud-actions button,
+  .hud-actions .btn-secondary { width: 100%; text-align: center; }
+}
