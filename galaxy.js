@@ -254,6 +254,12 @@ let galaxyReveal = 0;
 let explosionBoost = 0;
 const recentPulseTimes = [];
 
+// Optimalizace - cache pro vektory a throttling
+const _tempVec3 = new THREE.Vector3();
+let lastSpriteUpdateTime = 0;
+const SPRITE_UPDATE_INTERVAL = 1 / 30; // 30 FPS pro sprite aktualizace
+let frameCount = 0;
+
 async function loadPhotoManifest() {
   if (manifestCache) return manifestCache;
   const manifestCandidates = [
@@ -296,25 +302,30 @@ function clearStarSquares() {
   }
 }
 
+// Sdílený materiál pro star squares - výrazná optimalizace
+const sharedStarMaterial = new THREE.SpriteMaterial({
+  color: 0xffffff,
+  transparent: true,
+  opacity: 0.85,
+  depthWrite: false,
+  depthTest: false,
+});
+
 function createStarSquare(sprite, baseScale) {
-  const mat = new THREE.SpriteMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.85,
-    depthWrite: false,
-    depthTest: false,
-  });
+  const mat = sharedStarMaterial.clone();
   const square = new THREE.Sprite(mat);
   const scale = Math.max(0.8, baseScale * 0.18);
-  square.scale.set(scale, scale, 1);
+  square.scale.setScalar(scale);
   square.position.copy(sprite.position);
+  
+  // Předpočítat hodnoty aby se nevolaly Math funkce v animaci
+  const phase = Math.random() * Math.PI * 2;
   square.userData = {
-    spriteRef: sprite,
-    phase: Math.random() * Math.PI * 2,
-    offsetRadius: THREE.MathUtils.randFloat(3, 10),
+    phase: phase,
+    offsetRadius: 3 + Math.random() * 7,
     offsetAngleStart: Math.random() * Math.PI * 2,
-    offsetHeight: THREE.MathUtils.randFloatSpread(4),
-    offsetSpin: THREE.MathUtils.randFloat(0.12, 0.45),
+    offsetHeight: (Math.random() - 0.5) * 8,
+    offsetSpin: 0.12 + Math.random() * 0.33,
     baseSize: scale,
   };
   galaxyGroup.add(square);
@@ -459,11 +470,14 @@ function triggerGalaxyReveal() {
 
 function amplifyBurst(multiplier = 1) {
   explosionBoost = Math.min(1.6, explosionBoost + 0.9 * multiplier);
-  photoSprites.forEach((sprite) => {
-    const extra = THREE.MathUtils.randFloat(12, 36) * multiplier;
-    const ceiling = sprite.userData.baseRadius + 160;
-    sprite.userData.targetRadius = Math.min(sprite.userData.radius + extra, ceiling);
-  });
+  const len = photoSprites.length;
+  for (let i = 0; i < len; i++) {
+    const sprite = photoSprites[i];
+    const ud = sprite.userData;
+    const extra = (12 + Math.random() * 24) * multiplier;
+    const ceiling = ud.baseRadius + 160;
+    ud.targetRadius = Math.min(ud.radius + extra, ceiling);
+  }
 }
 
 function easeOutCubic(t) {
@@ -488,93 +502,120 @@ pulseButton?.addEventListener('click', () => {
 
 const clock = new THREE.Clock();
 let elapsedTime = 0;
+
+// Předpočítané hodnoty pro animaci
+let cachedPulseBoost = 1;
+let cachedHeartbeat = 1;
+let cachedWobbleTime = 0;
+
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
-  elapsedTime += delta;
-  const pulseBoost = 1 + pulseStrength * 2.4;
+  
+  // Limitovat delta pro stabilitu při lagách
+  const clampedDelta = Math.min(delta, 0.1);
+  elapsedTime += clampedDelta;
+  frameCount++;
+  
+  // Cache často používané hodnoty
+  cachedPulseBoost = 1 + pulseStrength * 2.4;
+  cachedWobbleTime = elapsedTime * 0.2;
 
   if (!galaxyActivated && preloadDone) {
     const idlePulse = 1 + Math.sin(elapsedTime * 1.1) * 0.06;
-    core.scale.set(idlePulse, idlePulse, idlePulse);
+    core.scale.setScalar(idlePulse);
   }
 
   if (galaxyActivated) {
-    galaxyReveal = Math.min(1, galaxyReveal + delta * 0.6);
+    galaxyReveal = Math.min(1, galaxyReveal + clampedDelta * 0.6);
     const revealEase = easeOutCubic(galaxyReveal);
-    galaxyGroup.visible = true;
-    galaxyGroup.scale.setScalar(THREE.MathUtils.lerp(0.05, 1, revealEase));
-    galaxyGroup.rotation.y += delta * 0.06 * (1 + explosionBoost);
-    explosionBoost = Math.max(0, explosionBoost - delta * 0.35);
+    galaxyGroup.scale.setScalar(0.05 + 0.95 * revealEase);
+    galaxyGroup.rotation.y += clampedDelta * 0.06 * (1 + explosionBoost);
+    explosionBoost = Math.max(0, explosionBoost - clampedDelta * 0.35);
     starMaterial.uniforms.burst.value = explosionBoost;
 
-    rings.forEach((ring, idx) => {
-      const target = 1 + explosionBoost * (0.2 + idx * 0.05);
-      ring.scale.setScalar(THREE.MathUtils.lerp(ring.userData.currentScale ?? 0.1, target, delta * 6));
-      ring.userData.currentScale = ring.scale.x;
-    });
+    // Aktualizovat rings jen každý druhý frame
+    if (frameCount % 2 === 0) {
+      const ringsLen = rings.length;
+      for (let idx = 0; idx < ringsLen; idx++) {
+        const ring = rings[idx];
+        const target = 1 + explosionBoost * (0.2 + idx * 0.05);
+        const currentScale = ring.userData.currentScale || 0.1;
+        const newScale = currentScale + (target - currentScale) * clampedDelta * 6;
+        ring.scale.setScalar(newScale);
+        ring.userData.currentScale = newScale;
+      }
+    }
   }
 
-  const heartbeat = 1 + Math.sin(elapsedTime * 1.4) * (0.07 + pulseStrength * 0.25);
-  core.scale.set(heartbeat, heartbeat, heartbeat);
-  core.rotation.y += 0.1 * delta * pulseBoost;
+  cachedHeartbeat = 1 + Math.sin(elapsedTime * 1.4) * (0.07 + pulseStrength * 0.25);
+  core.scale.setScalar(cachedHeartbeat);
+  core.rotation.y += 0.1 * clampedDelta * cachedPulseBoost;
 
-  rings.forEach((ring, idx) => {
-    const data = ring.userData || {};
-    const spinDir = data.spinDir ?? 1;
-    const baseX = data.baseX ?? Math.PI / 2;
-    const baseY = data.baseY ?? 0;
-    const tiltAmp = data.tiltAmp ?? 0.1;
-    const tiltSpeed = data.tiltSpeed ?? 0.4;
-    const phase = data.phase ?? 0;
-    const scaleFactor = galaxyActivated ? Math.max(0.2, ring.userData.currentScale ?? 1) : 0;
-    ring.rotation.z += 0.045 * delta * (idx + 1) * pulseBoost * spinDir * scaleFactor;
-    ring.rotation.x = baseX + Math.sin(elapsedTime * tiltSpeed + phase) * tiltAmp * scaleFactor;
-    ring.rotation.y = baseY + Math.cos(elapsedTime * tiltSpeed * 0.8 + phase) * tiltAmp * 0.6 * scaleFactor;
-  });
-
-  starField.rotation.y += 0.002 * delta;
-  try { starMaterial.uniforms.time.value = elapsedTime; } catch (e) {}
-
-  const wobbleTime = performance.now() * 0.0002;
-  photoSprites.forEach((sprite) => {
-    if (galaxyActivated) {
-      sprite.userData.radius = THREE.MathUtils.lerp(
-        sprite.userData.radius,
-        sprite.userData.targetRadius ?? sprite.userData.baseRadius,
-        delta * (0.8 + explosionBoost)
-      );
-      sprite.material.opacity = THREE.MathUtils.lerp(sprite.material.opacity, sprite.userData.baseOpacity ?? 1, delta * 2.5);
-    } else {
-      sprite.material.opacity = 0;
+  // Rings animace - optimalizovaná
+  const ringsLen = rings.length;
+  for (let idx = 0; idx < ringsLen; idx++) {
+    const ring = rings[idx];
+    const data = ring.userData;
+    const scaleFactor = galaxyActivated ? Math.max(0.2, data.currentScale || 1) : 0;
+    if (scaleFactor > 0.01) {
+      ring.rotation.z += 0.045 * clampedDelta * (idx + 1) * cachedPulseBoost * data.spinDir * scaleFactor;
+      const tiltTime = elapsedTime * data.tiltSpeed + data.phase;
+      ring.rotation.x = data.baseX + Math.sin(tiltTime) * data.tiltAmp * scaleFactor;
+      ring.rotation.y = data.baseY + Math.cos(tiltTime * 0.8) * data.tiltAmp * 0.6 * scaleFactor;
     }
-    sprite.userData.angle += sprite.userData.speed * pulseBoost;
-    sprite.position.x = Math.cos(sprite.userData.angle) * sprite.userData.radius;
-    sprite.position.z = Math.sin(sprite.userData.angle) * sprite.userData.radius;
-    sprite.position.y = sprite.userData.height + Math.sin(sprite.userData.wobblePhase + wobbleTime) * 3;
-    const square = sprite.userData.starSquare;
-    if (square) {
-      const visibility = galaxyActivated ? 1 : 0;
-      const phase = square.userData.phase ?? 0;
-      const flicker = 0.35 + Math.sin(elapsedTime * 2.1 + phase) * 0.3;
-      square.material.opacity = visibility * THREE.MathUtils.clamp(flicker, 0.1, 0.9);
-      const offsetRadius = square.userData.offsetRadius ?? 5;
-      const offsetSpin = square.userData.offsetSpin ?? 0.3;
-      const offsetAngle = (square.userData.offsetAngleStart ?? 0) + elapsedTime * offsetSpin;
-      const offsetHeight = square.userData.offsetHeight ?? 0;
-      square.position.set(
-        sprite.position.x + Math.cos(offsetAngle) * offsetRadius,
-        sprite.position.y + offsetHeight + Math.sin(elapsedTime * 1.7 + phase) * 0.7,
-        sprite.position.z + Math.sin(offsetAngle) * offsetRadius
-      );
-      const fallbackBase = Math.max(sprite.scale.x, sprite.scale.y) || 6;
-      const baseSize = square.userData.baseSize ?? fallbackBase * 0.12;
-      const sqSize = THREE.MathUtils.clamp(baseSize * (0.85 + Math.sin(elapsedTime * 2.5 + phase) * 0.18), 0.6, 2.0);
-      square.scale.set(sqSize, sqSize, 1);
-    }
-  });
+  }
 
-  pulseStrength = Math.max(0, pulseStrength - delta * 0.4);
+  starField.rotation.y += 0.002 * clampedDelta;
+  starMaterial.uniforms.time.value = elapsedTime;
+
+  // Sprite aktualizace - throttled na 30 FPS pro lepší výkon
+  const shouldUpdateSprites = (elapsedTime - lastSpriteUpdateTime) >= SPRITE_UPDATE_INTERVAL;
+  
+  if (shouldUpdateSprites) {
+    lastSpriteUpdateTime = elapsedTime;
+    const spritesLen = photoSprites.length;
+    const lerpFactor = clampedDelta * 2;
+    
+    for (let i = 0; i < spritesLen; i++) {
+      const sprite = photoSprites[i];
+      const ud = sprite.userData;
+      
+      if (galaxyActivated) {
+        const targetRadius = ud.targetRadius || ud.baseRadius;
+        ud.radius += (targetRadius - ud.radius) * clampedDelta * (0.8 + explosionBoost);
+        const targetOpacity = ud.baseOpacity || 1;
+        sprite.material.opacity += (targetOpacity - sprite.material.opacity) * lerpFactor;
+      } else {
+        sprite.material.opacity = 0;
+      }
+      
+      ud.angle += ud.speed * cachedPulseBoost;
+      const cosAngle = Math.cos(ud.angle);
+      const sinAngle = Math.sin(ud.angle);
+      sprite.position.x = cosAngle * ud.radius;
+      sprite.position.z = sinAngle * ud.radius;
+      sprite.position.y = ud.height + Math.sin(ud.wobblePhase + cachedWobbleTime) * 3;
+      
+      const square = ud.starSquare;
+      if (square) {
+        const sqData = square.userData;
+        const visibility = galaxyActivated ? 1 : 0;
+        const flickerPhase = elapsedTime * 2.1 + sqData.phase;
+        square.material.opacity = visibility * (0.35 + Math.sin(flickerPhase) * 0.3);
+        
+        const offsetAngle = sqData.offsetAngleStart + elapsedTime * sqData.offsetSpin;
+        square.position.x = sprite.position.x + Math.cos(offsetAngle) * sqData.offsetRadius;
+        square.position.y = sprite.position.y + sqData.offsetHeight + Math.sin(elapsedTime * 1.7 + sqData.phase) * 0.7;
+        square.position.z = sprite.position.z + Math.sin(offsetAngle) * sqData.offsetRadius;
+        
+        const sqSize = sqData.baseSize * (0.85 + Math.sin(elapsedTime * 2.5 + sqData.phase) * 0.18);
+        square.scale.setScalar(Math.max(0.6, Math.min(2.0, sqSize)));
+      }
+    }
+  }
+
+  pulseStrength = Math.max(0, pulseStrength - clampedDelta * 0.4);
   controls.autoRotateSpeed = prefersReducedMotion ? 0 : 0.6 + pulseStrength * 1.5;
   controls.update();
   renderer.render(scene, camera);

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gesture 3D Particles</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050505; font-family: sans-serif; }
+        canvas { display: block; }
+        #loading {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 24px; pointer-events: none; text-align: center;
+        }
+        /* Skryté video pro MediaPipe */
+        #input-video { display: none; }
+        
+        /* Tlačítko Fullscreen */
+        #fs-btn {
+            position: absolute; bottom: 20px; right: 20px;
+            padding: 10px 20px; background: rgba(255,255,255,0.1); color: white;
+            border: 1px solid rgba(255,255,255,0.2); cursor: pointer; border-radius: 4px;
+            transition: background 0.3s;
+        }
+        #fs-btn:hover { background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+
+    <div id="loading">Načítám AI model a kameru...<br><span style="font-size:14px; opacity:0.7">Povolte prosím přístup ke kameře</span></div>
+    <video id="input-video" playsinline></video>
+    <button id="fs-btn">Fullscreen</button>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { GUI } from 'https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js';
+        // OPRAVENÝ ODKAZ ZDE:
+        import { FilesetResolver, HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.js';
+
+        // --- KONFIGURACE ---
+        const config = {
+            particleCount: 8000,
+            baseColor: '#00ffff',
+            particleSize: 0.15,
+            spread: 5.0,
+            handInfluence: 0.0
+        };
+
+        // --- 1. THREE.JS SETUP ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050505, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 8;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        // --- 2. ČÁSTICOVÝ SYSTÉM ---
+        let geometry = new THREE.BufferGeometry();
+        let material = new THREE.PointsMaterial({
+            size: config.particleSize,
+            color: config.baseColor,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const originalPositions = [];
+        const positions = [];
+        
+        function generateParticles() {
+            originalPositions.length = 0;
+            positions.length = 0;
+            
+            for (let i = 0; i < config.particleCount; i++) {
+                const radius = Math.random() * config.spread;
+                const spin = radius * 2; 
+                const branchAngle = (i % 3) * ((2 * Math.PI) / 3);
+                
+                const x = Math.cos(branchAngle + spin) * radius + (Math.random() - 0.5);
+                const y = (Math.random() - 0.5) * (radius / 2);
+                const z = Math.sin(branchAngle + spin) * radius + (Math.random() - 0.5);
+
+                originalPositions.push(x, y, z);
+                positions.push(x, y, z);
+            }
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        }
+        
+        generateParticles();
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // --- 3. UI PANEL ---
+        const gui = new GUI({ title: 'Nastavení Částic' });
+        gui.addColor(config, 'baseColor').onChange(c => material.color.set(c)).name("Barva");
+        gui.add(config, 'particleSize', 0.01, 1.0).onChange(s => material.size = s).name("Velikost");
+        
+        // --- 4. MEDIAPIPE AI (Opraveno) ---
+        let handLandmarker = undefined;
+        let lastVideoTime = -1;
+        const video = document.getElementById("input-video");
+
+        async function setupAI() {
+            // Zde také musíme použít správnou verzi wasm souborů (0.10.3)
+            const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+            );
+            
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 1
+            });
+            
+            startWebcam();
+        }
+
+        function startWebcam() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Prohlížeč nepodporuje webkameru.");
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+                video.srcObject = stream;
+                video.addEventListener("loadeddata", () => {
+                    video.play();
+                    document.getElementById("loading").style.display = "none";
+                });
+            });
+        }
+
+        function detectGesture(results) {
+            if (results.landmarks.length > 0) {
+                const landmarks = results.landmarks[0];
+                const thumbTip = landmarks[4];
+                const indexTip = landmarks[8];
+                const wrist = landmarks[0];
+
+                const dist = Math.sqrt(
+                    Math.pow(indexTip.x - wrist.x, 2) + 
+                    Math.pow(indexTip.y - wrist.y, 2)
+                );
+
+                let factor = (dist - 0.15) * 4; 
+                factor = Math.max(0, Math.min(1, factor));
+                config.handInfluence += (factor - config.handInfluence) * 0.1;
+            } else {
+                config.handInfluence += (0.5 - config.handInfluence) * 0.05;
+            }
+        }
+
+        // --- 5. LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (handLandmarker && video.currentTime !== lastVideoTime) {
+                lastVideoTime = video.currentTime;
+                const results = handLandmarker.detectForVideo(video, performance.now());
+                detectGesture(results);
+            }
+
+            const positionsArray = geometry.attributes.position.array;
+            const time = Date.now() * 0.001;
+            const expansionScale = 0.2 + (config.handInfluence * 2.5);
+
+            for (let i = 0; i < config.particleCount; i++) {
+                const i3 = i * 3;
+                const x = originalPositions[i3];
+                const y = originalPositions[i3 + 1];
+                const z = originalPositions[i3 + 2];
+
+                positionsArray[i3]     = x * expansionScale + Math.sin(time + i) * 0.02;
+                positionsArray[i3 + 1] = y * expansionScale + Math.cos(time + i) * 0.02;
+                positionsArray[i3 + 2] = z * expansionScale;
+            }
+            
+            geometry.attributes.position.needsUpdate = true;
+            particles.rotation.y += 0.002;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        document.getElementById('fs-btn').addEventListener('click', () => {
+            if (!document.fullscreenElement) { document.body.requestFullscreen(); } 
+            else { document.exitFullscreen(); }
+        });
+
+        setupAI();
+        animate();
+    </script>
+</body>
+</html>
