@@ -1,0 +1,12 @@
+{
+  "name": "katinka-photos-tools",
+  "version": "1.0.0",
+  "description": "Utility scripts for converting gallery photos to web-friendly formats",
+  "private": true,
+  "scripts": {
+    "convert-photos": "node scripts/convert_photos.js"
+  },
+  "dependencies": {
+    "sharp": "^0.32.0"
+  }
+}

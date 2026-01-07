@@ -13,6 +13,54 @@ body {
   overflow: hidden;
 }
 
+.preload {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, rgba(15, 6, 25, 0.98), rgba(1, 0, 8, 0.98));
+  z-index: 10;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+
+.preload--done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preload__inner {
+  text-align: center;
+  padding: 32px 48px;
+  border-radius: 28px;
+  background: rgba(12, 5, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+}
+
+.preload__spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ff6ac7;
+  animation: preload-spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+.preload__label {
+  margin-top: 1rem;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f5d7ff;
+}
+
+@keyframes preload-spin {
+  to { transform: rotate(1turn); }
+}
+
 #galaxy-canvas {
   position: fixed;
   inset: 0;
