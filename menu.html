@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Menu — Dárek</title>
+  <link href="style-clean.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-paper"></div>
+
+  <main class="page">
+
+
+    <div style="text-align:center; margin:12px 0 18px;">
+      <img src="assets/curious.gif" alt="curious" class="menu-top-gif" />
+    </div>
+
+    <section class="menu-grid" id="menuGrid">
+      <article class="folder-card" data-index="0">
+        <img class="folder-icon" src="assets/wrapped.gif" alt="náš wrapped" />
+        <h3>Náš wrapped</h3>
+        <p>Naše momenty a vzpomínky.</p>
+      </article>
+
+      <article class="folder-card locked" data-index="1">
+        <div class="folder-locked"><small>Zamčeno</small></div>
+        <img class="folder-icon" src="assets/galaxy.gif" alt="galaxie" />
+        <h3>Galaxie</h3>
+        <p>Objev naši galaxii.</p>
+      </article>
+
+      <article class="folder-card locked" data-index="2">
+        <div class="folder-locked"><small>Zamčeno</small></div>
+        <img class="folder-icon" src="assets/game.gif" alt="hra o nás" />
+        <h3>Hra o nás</h3>
+        <p>Malá hra připomínající náš příběh.</p>
+      </article>
+    </section>
+  </main>
+
+  <div id="menuModal" class="menu-modal" role="dialog" aria-modal="true">
+    <div class="panel" id="menuPanel">
+      <h2 id="panelTitle">Náhled</h2>
+      <div id="panelContent"></div>
+      <div style="text-align:right; margin-top:12px;">
+        <button id="closePanel" class="btn btn-ghost">Zavřít</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="menu.js"></script>
+</body>
+</html>

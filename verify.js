@@ -10,17 +10,15 @@ FORM.addEventListener('submit', (e) => {
   const together = document.getElementById('together').value;
 
   if (birth === CORRECT_BIRTH && together === CORRECT_TOGETHER) {
-    HINT.textContent = 'Super! Všechno sedí — přesouvám tě na překvapení.';
     HINT.classList.remove('error');
     HINT.classList.add('success');
     setTimeout(() => {
-      window.location.href = 'galaxy.html';
+      window.location.href = 'menu.html';
     }, 900);
     return;
   }
 
-  // If wrong, show gentle hint
-  HINT.textContent = 'Tohle není správné.';
+  HINT.textContent = 'Tohle není správně.';
   HINT.classList.remove('success');
   HINT.classList.add('error');
 });

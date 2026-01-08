@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Náš Wrapped</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="wrapped.css" />
+</head>
+<body>
+
+  <div id="wrapped-app">
+
+    <!-- TIP: Pro každou sekci můžeš nastavit song přes atributy data-song, data-song-title a data-autoplay -->
+    <!-- Pro více fotek / videí vlož dovnitř .slide-content blok .slide-gallery a duplikuj jednotlivé <figure> -->
+
+    <!-- Slide 0: Intro -->
+    <section class="slide" data-index="0" data-bg="gradient-pink" data-song="assets/songs-edited/song1.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">2025 • náš rok</p>
+        <h1 class="big-title">Náš Wrapped</h1>
+        <p class="subtitle">Naše cesta vzpomínkami...</p>
+        <div class="tap-hint">Klikni pro pokračování</div>
+      </div>
+    </section>
+
+    <!-- Slide 1: Opening -->
+    <section class="slide" data-index="1" data-bg="gradient-purple" data-song="assets/songs-edited/song2.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">Všechno to začalo</p>
+        <h1 class="big-title">29. dubna 2025</h1>
+        <p class="subtitle">Ten den, kdy jsme se rozhodli být spolu.</p>
+      </div>
+    </section>
+
+    <!-- Slide 2: Timer section -->
+    <section class="slide" data-index="2" data-bg="gradient-blue" data-song="assets/songs-edited/song3.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">Od té doby uplynulo</p>
+        <h1 class="mega-title" id="timerDisplay">—</h1>
+        <p class="subtitle">A každý den stál za to.</p>
+      </div>
+    </section>
+
+    <!-- Slide 3: Custom section 1 -->
+    <section class="slide" data-index="3" data-bg="gradient-teal" data-song="assets/songs-edited/song4.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">Naše oblíbené</p>
+        <h1 class="big-title">Společné chvíle</h1>
+        <p class="subtitle">
+          <!-- ZDE SI NAPIŠ VLASTNÍ TEXT -->
+          Tady můžeš napsat, co chceš — třeba oblíbené momenty, výlety, nebo vtipné historky.
+        </p>
+      </div>
+    </section>
+
+    <!-- Slide 4: Custom section 2 -->
+    <section class="slide" data-index="4" data-bg="gradient-orange" data-song="assets/songs-edited/song5.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">Co mě na tobě baví</p>
+        <h1 class="big-title">Tvůj úsměv</h1>
+        <p class="subtitle">
+          <!-- ZDE SI NAPIŠ VLASTNÍ TEXT -->
+          A taky jak se směješ mým vtipům, i když nejsou vtipné.
+        </p>
+      </div>
+    </section>
+
+    <!-- Slide 5: Custom section 3 (with image) -->
+    <section class="slide" data-index="5" data-bg="gradient-pink-dark" data-song="assets/songs-edited/song6.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">Jedna z mých oblíbených fotek</p>
+          <div class="slide-gallery">
+            <figure class="media-card">
+              <img src="assets/curious.gif" alt="my" />
+              <figcaption>Popisek k fotce — můžeš změnit.</figcaption>
+            </figure>
+
+            <figure class="media-card">
+              <img src="assets/curious.gif" alt="další moment" />
+              <figcaption><!-- Doplň svůj text --></figcaption>
+            </figure>
+
+            <figure class="media-card video">
+              <video controls playsinline loop muted poster="">
+                <!-- Doplň cestu ke svému videu: -->
+                <!-- <source src="assets/videos/tvoje-video.mp4" type="video/mp4" /> -->
+              </video>
+              <figcaption><!-- Popisek videa --></figcaption>
+            </figure>
+          </div>
+        <p class="subtitle">
+          <!-- ZDE SI NAPIŠ VLASTNÍ TEXT -->
+          Tahle fotka mi vždycky zvedne náladu.
+        </p>
+      </div>
+    </section>
+
+    <!-- Slide 6: Looking forward -->
+    <section class="slide" data-index="6" data-bg="gradient-purple-dark" data-song="assets/songs-edited/song7.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">Co nás čeká</p>
+        <h1 class="big-title">Celý rok 2026</h1>
+        <p class="subtitle">
+          <!-- ZDE SI NAPIŠ VLASTNÍ TEXT -->
+          Společné plány, výlety, a spousta dalších vzpomínek.
+        </p>
+      </div>
+    </section>
+
+    <!-- Slide 7: Finale -->
+    <section class="slide" data-index="7" data-bg="gradient-finale" data-song="assets/songs-edited/song8.mp3" data-song-title="" data-autoplay="true">
+      <div class="slide-content">
+        <p class="eyebrow">A hlavně...</p>
+        <h1 class="mega-title">Miluju tě 💕</h1>
+        <p class="subtitle">Díky, že jsi.</p>
+        <div class="finale-buttons">
+          <button id="replay" class="wrapped-btn">Přehrát znovu</button>
+          <button id="closeWrapped" class="wrapped-btn secondary">Zpět</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <script src="wrapped.js"></script>
+</body>
+</html>
