@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hra o nás — Labyrint</title>
+  <link href="style-clean.css" rel="stylesheet" />
+  <link href="game.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-paper"></div>
+
+  <main class="page game-page">
+    <h1 class="game-title">Najdi cestu ke mně 💕</h1>
+    <p class="game-hint">Ovládání: šipky nebo WASD</p>
+
+    <div class="maze-container">
+      <canvas id="mazeCanvas"></canvas>
+    </div>
+
+    <div class="game-legend">
+      <div class="legend-item">
+        <img src="assets/girlfriend.png" alt="Ty" class="legend-img" />
+        <span>Ty</span>
+      </div>
+      <div class="legend-item">
+        <img src="assets/boyfriend.png" alt="Já" class="legend-img" />
+        <span>Já</span>
+      </div>
+    </div>
+
+    <a href="menu.html" class="btn btn-ghost back-btn">← Zpět do menu</a>
+  </main>
+
+  <!-- Win modal -->
+  <div class="win-modal" id="winModal">
+    <div class="win-content">
+      <h2>🎉 Našla jsi mě! 🎉</h2>
+      <p>Věděl jsem, že to zvládneš. Vždycky si ke mně najdeš cestu. 💕</p>
+      <img src="assets/curious.gif" alt="yay" class="win-gif" />
+      <button class="btn btn-primary" id="playAgain">Hrát znovu</button>
+      <a href="menu.html" class="btn btn-ghost">Zpět do menu</a>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -36,9 +36,13 @@ function updateTimer() {
   if (years > 0) parts.push(`${years} rok${years > 1 ? 'y' : ''}`);
   if (months > 0) parts.push(`${months} měsíc${months > 4 ? 'ů' : months > 1 ? 'e' : ''}`);
   if (remDays > 0) parts.push(`${remDays} dn${remDays > 4 ? 'í' : remDays > 1 ? 'y' : 'en'}`);
-
+  
+  // Přidáme hodiny, minuty a vteřiny
+  const timeStr = `${String(hrs).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  
   if (timerDisplay) {
-    timerDisplay.textContent = parts.join(', ') || '0 dní';
+    const mainText = parts.join(', ') || '0 dní';
+    timerDisplay.textContent = `${mainText} • ${timeStr}`;
   }
 }
 

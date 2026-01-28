@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "append_to_css",
+			"type": "shell",
+			"command": "echo \".card-link { display: block; text-decoration: none; color: inherit; }\" >> style-clean.css"
+		}
+	]
+}

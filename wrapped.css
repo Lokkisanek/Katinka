@@ -41,6 +41,11 @@ body {
   text-align: center;
 }
 
+.slide-content img {
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
 /* ===== GRADIENT BACKGROUNDS ===== */
 .slide[data-bg="gradient-pink"] {
   background: linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #6b2d5c 100%);
@@ -127,7 +132,7 @@ body {
   max-height: 320px;
   width: 100%;
   height: auto;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
 }
 
@@ -160,7 +165,7 @@ body {
 .media-card img,
 .media-card video {
   width: 100%;
-  border-radius: 12px;
+  border-radius: 16px;
   display: block;
   max-height: 320px;
   object-fit: cover;
