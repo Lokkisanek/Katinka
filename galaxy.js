@@ -4,8 +4,16 @@ import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.162.0/examples/
 
 const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-const detailMultiplier = 0.8;
-const maxPixelRatio = 0.8;
+const is2K = window.innerWidth >= 2048 || window.innerHeight >= 1440;
+const isHighDPI = window.devicePixelRatio > 1.5;
+const detailMultiplier = isMobile ? 0.6 : (is2K ? 0.7 : 0.85);
+const maxPixelRatio = isMobile ? 1.0 : (is2K ? 1.5 : Math.min(window.devicePixelRatio, 2.0));
+
+// Adaptivní kvalita - snížíme pokud FPS klesne
+let adaptiveQuality = 1.0;
+let fpsHistory = [];
+const TARGET_FPS = 50;
+const FPS_HISTORY_SIZE = 30;
 
 const preloadOverlay = document.getElementById('preload-overlay');
 const PRELOAD_TIMEOUT_MS = 12000;
@@ -31,10 +39,18 @@ function markPreloadReady(key) {
 }
 
 const canvas = document.getElementById('galaxy-canvas');
-const renderer = new THREE.WebGLRenderer({ antialias: true, canvas, alpha: true });
+const renderer = new THREE.WebGLRenderer({ 
+  antialias: !isMobile && !is2K, // Vypnout antialias na 2K pro výkon
+  canvas, 
+  alpha: true,
+  powerPreference: 'high-performance',
+  stencil: false,
+  depth: true
+});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x010007, 1);
+renderer.info.autoReset = false; // Manuální reset pro monitoring
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x02010c, 0.004);
@@ -71,11 +87,11 @@ heartShape.bezierCurveTo(6, 8.2, 0, 8.5, 0, 5.5);
 
 const heartExtrude = {
   depth: 10,
-  steps: 28,
+  steps: isMobile ? 12 : 18,
   bevelEnabled: true,
   bevelThickness: 1.0,
   bevelSize: 1.4,
-  bevelSegments: 32,
+  bevelSegments: isMobile ? 12 : 18,
 };
 const heartGeometry = new THREE.ExtrudeGeometry(heartShape, heartExtrude);
 heartGeometry.center();
@@ -150,13 +166,14 @@ loader.load(
 );
 
 const rings = [];
+const torusSegments = isMobile ? 48 : (is2K ? 72 : 96);
 [28, 42, 58].forEach((radius, index) => {
   const torus = new THREE.Mesh(
     new THREE.TorusGeometry(
       radius,
       0.6 + index * 0.1,
-      24,
-      Math.max(120, Math.round(140 * detailMultiplier))
+      isMobile ? 12 : 16,
+      torusSegments
     ),
     new THREE.MeshBasicMaterial({ color: 0xffb4e5, transparent: true, opacity: 0.25 - index * 0.05 })
   );
@@ -175,7 +192,7 @@ const rings = [];
   rings.push(torus);
 });
 
-const starCount = Math.max(900, Math.round(1300 * detailMultiplier));
+const starCount = isMobile ? 600 : (is2K ? 800 : 1000);
 const starPositions = new Float32Array(starCount * 3);
 for (let i = 0; i < starCount; i += 1) {
   const radius = THREE.MathUtils.randFloat(60, 320);
@@ -258,8 +275,10 @@ const recentPulseTimes = [];
 // Optimalizace - cache pro vektory a throttling
 const _tempVec3 = new THREE.Vector3();
 let lastSpriteUpdateTime = 0;
-const SPRITE_UPDATE_INTERVAL = 1 / 30; // 30 FPS pro sprite aktualizace
+let SPRITE_UPDATE_INTERVAL = is2K ? 1 / 24 : 1 / 30; // Adaptivní FPS pro sprite aktualizace
 let frameCount = 0;
+let lastFpsTime = performance.now();
+let framesSinceLastFps = 0;
 
 async function loadPhotoManifest() {
   if (manifestCache) return manifestCache;
@@ -382,7 +401,7 @@ async function createPhotoSpritesFromManifest() {
     return;
   }
 
-  const deviceLimit = isMobile ? 60 : 200;
+  const deviceLimit = isMobile ? 60 : (is2K ? 120 : 180);
   const maxToCreate = Math.max(12, Math.min(deviceLimit, Math.round(photoSources.length * detailMultiplier)));
   nextPhotoIndex = photoSources.length ? maxToCreate % photoSources.length : 0;
 
@@ -585,6 +604,27 @@ function animate() {
   const clampedDelta = Math.min(delta, 0.1);
   elapsedTime += clampedDelta;
   frameCount++;
+  framesSinceLastFps++;
+  
+  // FPS monitoring a adaptivní kvalita
+  const now = performance.now();
+  if (now - lastFpsTime >= 1000) {
+    const currentFps = framesSinceLastFps;
+    fpsHistory.push(currentFps);
+    if (fpsHistory.length > FPS_HISTORY_SIZE) fpsHistory.shift();
+    
+    // Adaptivní kvalita - pokud FPS klesne pod cíl, snížíme update rate
+    const avgFps = fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length;
+    if (avgFps < TARGET_FPS * 0.8 && SPRITE_UPDATE_INTERVAL < 1/15) {
+      SPRITE_UPDATE_INTERVAL = Math.min(SPRITE_UPDATE_INTERVAL * 1.2, 1/15);
+    } else if (avgFps > TARGET_FPS && SPRITE_UPDATE_INTERVAL > 1/30) {
+      SPRITE_UPDATE_INTERVAL = Math.max(SPRITE_UPDATE_INTERVAL * 0.9, 1/30);
+    }
+    
+    framesSinceLastFps = 0;
+    lastFpsTime = now;
+    renderer.info.reset();
+  }
   
   // Cache často používané hodnoty
   cachedPulseBoost = 1 + pulseStrength * 2.4;
@@ -603,8 +643,9 @@ function animate() {
     explosionBoost = Math.max(0, explosionBoost - clampedDelta * 0.35);
     starMaterial.uniforms.burst.value = explosionBoost;
 
-    // Aktualizovat rings jen každý druhý frame
-    if (frameCount % 2 === 0) {
+    // Aktualizovat rings jen občas pro výkon
+    const ringsUpdateFreq = is2K ? 3 : 2;
+    if (frameCount % ringsUpdateFreq === 0) {
       const ringsLen = rings.length;
       for (let idx = 0; idx < ringsLen; idx++) {
         const ring = rings[idx];
@@ -712,10 +753,15 @@ function animate() {
 
 animate();
 
+let resizeTimeout;
 window.addEventListener('resize', () => {
-  const { innerWidth, innerHeight } = window;
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  try { starMaterial.uniforms.pixelRatio.value = Math.max(1, Math.min(window.devicePixelRatio, 2)); } catch (e) {}
+  // Debounce resize pro výkon
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    const { innerWidth, innerHeight } = window;
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+    try { starMaterial.uniforms.pixelRatio.value = Math.max(1, Math.min(window.devicePixelRatio, maxPixelRatio)); } catch (e) {}
+  }, 100);
 });

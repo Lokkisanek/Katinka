@@ -68,6 +68,11 @@ body {
   height: 100vh;
   display: block;
   background: transparent;
+  /* GPU akcelerace a optimalizace vykreslování */
+  will-change: contents;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  image-rendering: auto;
 }
 
 .hud {
