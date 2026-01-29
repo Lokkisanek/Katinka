@@ -248,6 +248,7 @@ const photoSprites = [];
 const starSquares = [];
 let photoSources = [];
 let nextPhotoIndex = 0;
+let secretGiftSprite = null; // Secret gift photo sprite
 let manifestCache = null;
 let galaxyActivated = false;
 let galaxyReveal = 0;
@@ -459,6 +460,74 @@ async function createPhotoSpritesFromManifest() {
 
 createPhotoSpritesFromManifest();
 
+// Create secret gift sprite - just a golden star
+function createSecretGiftSprite() {
+  // Create only the glowing golden star
+  const starMat = new THREE.SpriteMaterial({
+    color: 0xffd700, // Golden color
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+  });
+  secretGiftSprite = new THREE.Sprite(starMat);
+  
+  // Position it in a slightly hidden location
+  const radius = 75;
+  const angle = Math.PI * 1.3; // Specific angle to make it findable but not obvious
+  const height = -15;
+  
+  secretGiftSprite.position.set(
+    Math.cos(angle) * radius,
+    height,
+    Math.sin(angle) * radius
+  );
+  
+  const baseScale = 4;
+  secretGiftSprite.scale.set(baseScale, baseScale, 1);
+  
+  secretGiftSprite.userData = {
+    isSecretGift: true,
+    radius,
+    baseRadius: radius,
+    targetRadius: radius,
+    angle,
+    height,
+    wobblePhase: Math.random() * Math.PI * 2,
+    speed: 0.001,
+    baseOpacity: 1,
+    glowPhase: 0,
+    baseScale
+  };
+  
+  galaxyGroup.add(secretGiftSprite);
+}
+
+createSecretGiftSprite();
+
+// Raycaster for clicking on secret gift
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+canvas.addEventListener('click', (event) => {
+  if (!galaxyActivated || !secretGiftSprite) return;
+  
+  // Calculate mouse position in normalized device coordinates
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  
+  raycaster.setFromCamera(mouse, camera);
+  
+  // Check intersection with secret gift sprite
+  const intersects = raycaster.intersectObject(secretGiftSprite);
+  
+  if (intersects.length > 0) {
+    // Found the secret!
+    if (window.unlockGalaxySecret) {
+      window.unlockGalaxySecret();
+    }
+  }
+});
+
 function triggerGalaxyReveal() {
   if (galaxyActivated) return;
   galaxyActivated = true;
@@ -612,6 +681,26 @@ function animate() {
         const sqSize = sqData.baseSize * (0.85 + Math.sin(elapsedTime * 2.5 + sqData.phase) * 0.18);
         square.scale.setScalar(Math.max(0.6, Math.min(2.0, sqSize)));
       }
+    }
+    
+    // Animate secret gift sprite (golden star)
+    if (secretGiftSprite) {
+      const ud = secretGiftSprite.userData;
+      ud.angle += ud.speed * cachedPulseBoost;
+      const cosAngle = Math.cos(ud.angle);
+      const sinAngle = Math.sin(ud.angle);
+      secretGiftSprite.position.x = cosAngle * ud.radius;
+      secretGiftSprite.position.z = sinAngle * ud.radius;
+      secretGiftSprite.position.y = ud.height + Math.sin(ud.wobblePhase + cachedWobbleTime) * 3;
+      
+      // Pulsing glow effect
+      ud.glowPhase += clampedDelta * 2;
+      const glowIntensity = 0.6 + Math.sin(ud.glowPhase) * 0.4;
+      secretGiftSprite.material.opacity = glowIntensity;
+      
+      // Pulsing size
+      const pulseSize = ud.baseScale * (0.8 + Math.sin(ud.glowPhase * 1.5) * 0.3);
+      secretGiftSprite.scale.setScalar(pulseSize);
     }
   }
 

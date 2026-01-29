@@ -8,6 +8,18 @@
   justify-content: center;
 }
 
+/* Dark overlay for better visibility */
+.quiz-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: -1;
+}
+
 .quiz-screen {
   width: 100%;
   max-width: 900px;
@@ -81,18 +93,20 @@
 }
 
 .prize-ladder {
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  background: linear-gradient(180deg, rgba(30,20,35,0.92), rgba(20,15,25,0.95));
   border-radius: 12px;
   padding: 12px 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   min-width: 160px;
+  border: 1px solid rgba(255,105,156,0.2);
+  backdrop-filter: blur(10px);
 }
 
 .prize-step {
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: rgba(255,255,255,0.75);
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -137,11 +151,13 @@
 }
 
 .question-box {
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  background: linear-gradient(180deg, rgba(30,20,35,0.92), rgba(20,15,25,0.95));
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.4);
   text-align: center;
+  border: 1px solid rgba(255,105,156,0.25);
+  backdrop-filter: blur(10px);
 }
 
 .question-number {
@@ -158,6 +174,8 @@
   font-size: 1.6rem;
   margin: 0;
   line-height: 1.4;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 
 /* Answers */
@@ -168,18 +186,20 @@
 }
 
 .answer-btn {
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  border: 2px solid rgba(255,105,156,0.2);
+  background: linear-gradient(180deg, rgba(30,20,35,0.92), rgba(20,15,25,0.95));
+  border: 2px solid rgba(255,105,156,0.35);
   border-radius: 12px;
   padding: 16px 20px;
   text-align: left;
   font-size: 1rem;
-  color: var(--text);
+  color: #fff;
   cursor: pointer;
   transition: all 200ms ease;
   display: flex;
   align-items: center;
   gap: 10px;
+  backdrop-filter: blur(10px);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
 .answer-btn:hover:not(:disabled) {
@@ -233,9 +253,12 @@
 .current-prize {
   text-align: center;
   padding: 12px;
-  background: linear-gradient(90deg, rgba(255,105,156,0.1), rgba(255,154,193,0.1));
+  background: linear-gradient(90deg, rgba(30,20,35,0.9), rgba(20,15,25,0.9));
   border-radius: 8px;
   font-size: 1.05rem;
+  color: #fff;
+  border: 1px solid rgba(255,105,156,0.3);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
 
 .current-prize strong {

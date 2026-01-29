@@ -1,0 +1,276 @@
+/* Gifts page styles */
+.gifts-page {
+  text-align: center;
+  padding: 24px 0 48px;
+}
+
+.gifts-title {
+  font-family: "DM Serif Display", serif;
+  font-size: 2.6rem;
+  margin-bottom: 8px;
+  text-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.gifts-subtitle {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin-bottom: 32px;
+}
+
+/* Gifts grid */
+.gifts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto 32px;
+  padding: 0 16px;
+}
+
+/* Gift card */
+.gift-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  min-height: 320px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gift-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+/* Locked overlay */
+.gift-locked-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 2;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.gift-card.unlocked .gift-locked-overlay {
+  opacity: 0;
+  transform: scale(1.1);
+  pointer-events: none;
+}
+
+.gift-emoji {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: bounce 2s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.gift-hint {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn-small {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+}
+
+/* Games progress in gift card */
+.games-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.game-check {
+  background: rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.game-check.completed {
+  background: rgba(46, 204, 113, 0.8);
+}
+
+/* Revealed gift */
+.gift-revealed {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.gift-image {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.gift-title {
+  font-family: "DM Serif Display", serif;
+  font-size: 1.4rem;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.gift-description {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Progress bar */
+.gifts-progress {
+  max-width: 400px;
+  margin: 0 auto 24px;
+  padding: 0 16px;
+}
+
+.progress-bar {
+  height: 12px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 6px;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.back-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* Gift modal */
+.gift-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+}
+
+.gift-modal.show {
+  display: flex;
+}
+
+.gift-modal-content {
+  background: linear-gradient(180deg, #fff9f8 0%, #fff0f3 100%);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  animation: giftReveal 0.6s cubic-bezier(.2,.9,.3,1);
+}
+
+@keyframes giftReveal {
+  0% { opacity: 0; transform: scale(0.8) rotateY(90deg); }
+  50% { transform: scale(1.05) rotateY(0deg); }
+  100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+}
+
+.gift-modal-content h2 {
+  font-family: "DM Serif Display", serif;
+  font-size: 2rem;
+  margin: 0 0 16px;
+  color: var(--text);
+}
+
+.modal-gift-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+}
+
+.modal-gift-title {
+  font-family: "DM Serif Display", serif;
+  font-size: 1.5rem;
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+
+.modal-gift-description {
+  color: var(--muted);
+  font-size: 1rem;
+  margin: 0 0 20px;
+}
+
+/* Confetti effect for unlocked cards */
+.gift-card.just-unlocked::before {
+  content: '🎊';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  animation: confettiFall 1s ease forwards;
+  z-index: 10;
+}
+
+@keyframes confettiFall {
+  0% { top: -20px; opacity: 1; }
+  100% { top: 50%; opacity: 0; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .gifts-title { font-size: 2rem; }
+  
+  .gifts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .gift-card {
+    min-height: 280px;
+  }
+  
+  .gift-emoji { font-size: 3rem; }
+  
+  .gift-modal-content {
+    padding: 24px;
+  }
+  
+  .gift-modal-content h2 {
+    font-size: 1.6rem;
+  }
+}

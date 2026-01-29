@@ -162,3 +162,78 @@ h1 {
   .hud-actions button,
   .hud-actions .btn-secondary { width: 100%; text-align: center; }
 }
+
+/* Secret hint */
+.secret-hint {
+  color: #ffd700;
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  animation: pulse-hint 2s ease infinite;
+}
+
+@keyframes pulse-hint {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Secret modal */
+.secret-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.secret-modal.show {
+  display: flex;
+}
+
+.secret-content {
+  background: linear-gradient(135deg, #1a0a2e 0%, #0d0514 100%);
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 0 60px rgba(255, 215, 0, 0.3);
+  animation: star-pop 0.5s ease;
+}
+
+@keyframes star-pop {
+  0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.secret-content h2 {
+  font-family: "DM Serif Display", serif;
+  font-size: 1.8rem;
+  color: #ffd700;
+  margin: 0 0 12px;
+}
+
+.secret-content p {
+  color: #f8e8ff;
+  margin: 0 0 20px;
+}
+
+.secret-btn {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  border: none;
+  border-radius: 30px;
+  padding: 12px 32px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a0a2e;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.secret-btn:hover {
+  transform: scale(1.05);
+}

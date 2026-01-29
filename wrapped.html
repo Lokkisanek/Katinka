@@ -112,7 +112,7 @@
         <p class="subtitle">Díky, že jsi.</p>
         <div class="finale-buttons">
           <button id="replay" class="wrapped-btn">Přehrát znovu</button>
-          <button id="closeWrapped" class="wrapped-btn secondary">Zpět</button>
+          <a href="gift1.html" class="wrapped-btn secondary">🎁 Otevřít dárek</a>
         </div>
       </div>
     </section>
@@ -125,5 +125,22 @@
   </div>
 
   <script src="wrapped.js"></script>
+  <script>
+    // Mark wrapped as complete when user reaches the final slide
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new MutationObserver(() => {
+        const finalSlide = document.querySelector('[data-index="7"].active');
+        if (finalSlide) {
+          // Mark wrapped as complete for gift unlock
+          const sections = JSON.parse(localStorage.getItem('unlockedSections') || '[]');
+          if (!sections.includes('wrapped-complete')) {
+            sections.push('wrapped-complete');
+            localStorage.setItem('unlockedSections', JSON.stringify(sections));
+          }
+        }
+      });
+      observer.observe(document.getElementById('wrapped-app'), { subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+  </script>
 </body>
 </html>

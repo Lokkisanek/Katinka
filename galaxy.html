@@ -23,9 +23,19 @@
       <p class="eyebrow">Galaktický archiv</p>
       <h1>Kačenčina galaxie</h1>
       <p class="lede">Každá fotka je hvězda z našeho života</p>
+      <p class="secret-hint">💫 Najdi skrytou hvězdu s dárkem!</p>
       <div class="hud-actions">
         <button id="pulse-btn" type="button">Poslat pulz</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Secret gift star modal -->
+  <div class="secret-modal" id="secretModal">
+    <div class="secret-content">
+      <h2>🌟 Našla jsi tajnou hvězdu! 🌟</h2>
+      <p>Gratuluju! Odemkla sis druhý dárek!</p>
+      <a href="gift2.html" class="secret-btn">🎁 Otevřít dárek</a>
     </div>
   </div>
 
@@ -41,5 +51,16 @@
     }
   </script>
   <script type="module" src="galaxy.js"></script>
+  <script>
+    // Function to unlock galaxy secret (call from galaxy.js when secret star is clicked)
+    window.unlockGalaxySecret = function() {
+      const sections = JSON.parse(localStorage.getItem('unlockedSections') || '[]');
+      if (!sections.includes('galaxy-secret')) {
+        sections.push('galaxy-secret');
+        localStorage.setItem('unlockedSections', JSON.stringify(sections));
+      }
+      document.getElementById('secretModal').classList.add('show');
+    };
+  </script>
 </body>
 </html>

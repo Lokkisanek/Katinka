@@ -38,11 +38,23 @@
       <h2>🎉 Našla jsi mě! 🎉</h2>
       <p>Věděl jsem, že to zvládneš. Vždycky si ke mně najdeš cestu. 💕</p>
       <img src="assets/curious.gif" alt="yay" class="win-gif" />
-      <button class="btn btn-primary" id="playAgain">Hrát znovu</button>
-      <a href="menu.html" class="btn btn-ghost">Zpět do menu</a>
+      <a href="game2.html" class="btn btn-ghost">Další hra</a>
     </div>
   </div>
 
   <script src="game.js"></script>
+  <script>
+    // Mark game1 as completed when win modal shows
+    const observer = new MutationObserver(() => {
+      if (document.getElementById('winModal').classList.contains('show')) {
+        const games = JSON.parse(localStorage.getItem('completedGames') || '[]');
+        if (!games.includes('game1')) {
+          games.push('game1');
+          localStorage.setItem('completedGames', JSON.stringify(games));
+        }
+      }
+    });
+    observer.observe(document.getElementById('winModal'), { attributes: true, attributeFilter: ['class'] });
+  </script>
 </body>
 </html>

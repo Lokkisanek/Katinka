@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tvoje narozeninová nadílka</title>
+  <link href="style-clean.css" rel="stylesheet" />
+  <link href="gifts.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-paper"></div>
+
+  <main class="page gifts-page">
+    <h1 class="gifts-title">Tvoje narozeninová nadílka 🎂</h1>
+    <p class="gifts-subtitle">Prozkoumej stránku a odemkni svoje dárky!</p>
+
+    <div class="gifts-grid" id="giftsGrid">
+      <!-- Gift 1 - After wrapped -->
+      <div class="gift-card locked" data-gift="gift1" data-required="wrapped-complete">
+        <div class="gift-locked-overlay">
+          <span class="gift-emoji">🎁</span>
+          <p class="gift-hint">Dokoukej náš wrapped a dárek se odemkne!</p>
+          <a href="wrapped.html" class="btn btn-primary btn-small">Prozkoumat</a>
+        </div>
+        <div class="gift-revealed">
+          <img src="img/voucher-wellness.jpg" alt="Dárek" class="gift-image" />
+          <h3 class="gift-title">Něco pro relax</h3>
+          <p class="gift-description">První kousek skládačky tvých narozenin.</p>
+          <a href="gift1.html" class="btn btn-primary btn-small">Zobrazit dárek</a>
+        </div>
+      </div>
+
+      <!-- Gift 2 - After finding photo in galaxy -->
+      <div class="gift-card locked" data-gift="gift2" data-required="galaxy-secret">
+        <div class="gift-locked-overlay">
+          <span class="gift-emoji">🎁</span>
+          <p class="gift-hint">Najdi skrytou fotku v galaxii a dárek se odemkne!</p>
+          <a href="galaxy.html" class="btn btn-primary btn-small">Prozkoumat</a>
+        </div>
+        <div class="gift-revealed">
+          <img src="img/listky-koncert.jpg" alt="Dárek" class="gift-image" />
+          <h3 class="gift-title">Kulturní zážitek</h3>
+          <p class="gift-description">Protože vím, jak tuhle kapelu miluješ!</p>
+          <a href="gift2.html" class="btn btn-primary btn-small">Zobrazit dárek</a>
+        </div>
+      </div>
+
+      <!-- Gift 3 - After completing all games -->
+      <div class="gift-card locked" data-gift="gift3" data-required="all-games-complete">
+        <div class="gift-locked-overlay">
+          <span class="gift-emoji">🎁</span>
+          <p class="gift-hint">Dohraj všechny 3 hry a dárek se odemkne!</p>
+          <div class="games-progress">
+            <span class="game-check" data-game="game1">🎮 Labyrint</span>
+            <span class="game-check" data-game="game2">🎮 Milionář</span>
+            <span class="game-check" data-game="game3">🎮 Puzzle</span>
+          </div>
+        </div>
+        <div class="gift-revealed">
+          <img src="img/hlavni-prekvapeni.jpg" alt="Dárek" class="gift-image" />
+          <h3 class="gift-title">To nejlepší na konec</h3>
+          <p class="gift-description">Díky, že jsi to dočetla až sem. Miluju tě.</p>
+          <a href="gift3.html" class="btn btn-primary btn-small">Zobrazit dárek</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="gifts-progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <p class="progress-text"><span id="unlockedCount">0</span> / 3 dárků odemčeno</p>
+    </div>
+
+    <a href="menu.html" class="btn btn-ghost back-btn">← Zpět do menu</a>
+  </main>
+
+  <!-- Gift reveal modal -->
+  <div class="gift-modal" id="giftModal">
+    <div class="gift-modal-content">
+      <h2>🎉 Dárek odemčen! 🎉</h2>
+      <img src="" alt="Dárek" class="modal-gift-image" id="modalGiftImage" />
+      <h3 class="modal-gift-title" id="modalGiftTitle"></h3>
+      <p class="modal-gift-description" id="modalGiftDescription"></p>
+      <button class="btn btn-primary" id="closeModal">Super!</button>
+    </div>
+  </div>
+
+  <script src="gifts.js"></script>
+</body>
+</html>

@@ -17,7 +17,7 @@
       <p class="quiz-subtitle">Odpověz správně na 10 otázek a vyhraj až <strong>100 pusinek</strong>! 💋</p>
       <img src="assets/curious.gif" alt="quiz" class="quiz-gif" />
       <button class="btn btn-primary start-btn" id="startBtn">Začít hrát</button>
-      <a href="menu.html" class="btn btn-ghost">← Zpět do menu</a>
+     
     </div>
 
     <!-- Game screen -->
@@ -58,12 +58,27 @@
           <span class="prize-label">pusinek 💋</span>
         </div>
         <img src="assets/curious.gif" alt="result" class="result-gif" id="resultGif" />
-        <button class="btn btn-primary" id="playAgainBtn">Hrát znovu</button>
-        <a href="menu.html" class="btn btn-ghost">← Zpět do menu</a>
+        
+        <a href="game3.html" class="btn btn-ghost">Další Hra</a>
       </div>
     </div>
   </main>
 
   <script src="game2.js"></script>
+  <script>
+    // Mark game2 as completed when result screen shows with a win
+    const observer = new MutationObserver(() => {
+      const resultScreen = document.getElementById('resultScreen');
+      const resultTitle = document.getElementById('resultTitle');
+      if (!resultScreen.classList.contains('hidden') && resultTitle.textContent.includes('Gratuluji')) {
+        const games = JSON.parse(localStorage.getItem('completedGames') || '[]');
+        if (!games.includes('game2')) {
+          games.push('game2');
+          localStorage.setItem('completedGames', JSON.stringify(games));
+        }
+      }
+    });
+    observer.observe(document.getElementById('resultScreen'), { attributes: true, attributeFilter: ['class'] });
+  </script>
 </body>
 </html>
