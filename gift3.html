@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tvůj dárek 🎁</title>
+  <link href="style-clean.css" rel="stylesheet" />
+  <link href="gift3.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-paper"></div>
+  <canvas id="confettiCanvas"></canvas>
+
+  <main class="page gift-page">
+    <div class="gift-container" id="giftContainer">
+      <!-- Before reveal -->
+      <div class="gift-before" id="giftBefore">
+        <p class="gift-hint">Klikni na dárek pro rozbalení!</p>
+        <div class="gift-box" id="giftBox">
+          <div class="gift-lid" id="giftLid">
+            <div class="gift-bow"></div>
+          </div>
+          <div class="gift-base">
+            <div class="gift-ribbon-v"></div>
+            <div class="gift-ribbon-h"></div>
+          </div>
+        </div>
+        <p class="click-count" id="clickCount"></p>
+      </div>
+
+      <!-- After reveal -->
+      <div class="gift-after hidden" id="giftAfter">
+        <h1 class="gift-title">🎉 Překvapení! 🎉</h1>
+        <p class="gift-subtitle">Tady je tvůj třetí dárek...</p>
+        <div class="gift-reveal">
+          <img src="img/darek3.jpg" alt="Tvůj dárek" class="gift-image" id="giftImage" />
+        </div>
+        <p class="gift-message">Jsi ta nejlepší! 💖</p>
+        <a href="menu.html" class="btn btn-primary">← Zpět do menu</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="gift3.js"></script>
+</body>
+</html>
