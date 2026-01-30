@@ -9,6 +9,13 @@ const isHighDPI = window.devicePixelRatio > 1.5;
 const detailMultiplier = isMobile ? 0.6 : (is2K ? 0.7 : 0.85);
 const maxPixelRatio = isMobile ? 1.0 : (is2K ? 1.5 : Math.min(window.devicePixelRatio, 2.0));
 
+// Audio effects
+const pulseSound = new Audio('assets/shine-5-268908.mp3');
+pulseSound.volume = 0.6;
+const galaxyAmbient = new Audio('assets/tmosphere-of-a-wild-tropical-planet-136362.mp3');
+galaxyAmbient.volume = 0.4;
+galaxyAmbient.loop = true;
+
 // Adaptivní kvalita - snížíme pokud FPS klesne
 let adaptiveQuality = 1.0;
 let fpsHistory = [];
@@ -16,15 +23,33 @@ const TARGET_FPS = 50;
 const FPS_HISTORY_SIZE = 30;
 
 const preloadOverlay = document.getElementById('preload-overlay');
-const PRELOAD_TIMEOUT_MS = 12000;
+const preloadProgress = document.getElementById('preloadProgress');
+const preloadPercent = document.getElementById('preloadPercent');
+const PRELOAD_TIMEOUT_MS = 30000; // Longer timeout for full preload
 const preloadState = { heart: false, photos: false };
 let preloadDone = false;
 const preloadFailsafe = setTimeout(() => hidePreloadOverlay(true), PRELOAD_TIMEOUT_MS);
+
+// Texture cache for preloaded textures
+const textureCache = new Map();
+let totalToLoad = 0;
+let loadedCount = 0;
+let warmupComplete = false;
+let warmupFrames = 0;
+const WARMUP_FRAMES_NEEDED = 10; // Render 10 frames to warm up GPU
+
+function updatePreloadProgress() {
+  if (totalToLoad === 0) return;
+  const percent = Math.round((loadedCount / totalToLoad) * 100);
+  if (preloadProgress) preloadProgress.style.width = `${percent}%`;
+  if (preloadPercent) preloadPercent.textContent = `${percent}%`;
+}
 
 function hidePreloadOverlay(force = false) {
   if (preloadDone) return;
   const allReady = Object.values(preloadState).every(Boolean);
   if (!force && !allReady) return;
+  if (!force && !warmupComplete) return; // Wait for GPU warmup
   preloadDone = true;
   clearTimeout(preloadFailsafe);
   preloadOverlay?.classList.add('preload--done');
@@ -121,6 +146,8 @@ function useFallbackHeart() {
   fallback.geometry.computeVertexNormals?.();
   core.add(fallback);
   core.add(innerHeartLight);
+  loadedCount++;
+  updatePreloadProgress();
   markPreloadReady('heart');
 }
 
@@ -156,6 +183,8 @@ loader.load(
     model.rotation.set(0, 0, 0);
     core.add(model);
     core.add(innerHeartLight);
+    loadedCount++;
+    updatePreloadProgress();
     markPreloadReady('heart');
   },
   undefined,
@@ -379,9 +408,35 @@ function applyTextureToSprite(sprite, tex, baseScale) {
 }
 
 async function loadSpriteTexture(sprite, source, baseScale) {
-  const tex = await textureLoader.loadAsync(source);
-  try { tex.colorSpace = THREE.SRGBColorSpace; } catch (e) {}
+  // Use cached texture if available
+  let tex = textureCache.get(source);
+  if (!tex) {
+    tex = await textureLoader.loadAsync(source);
+    try { tex.colorSpace = THREE.SRGBColorSpace; } catch (e) {}
+    textureCache.set(source, tex);
+  }
   applyTextureToSprite(sprite, tex, baseScale);
+}
+
+// Preload all textures first
+async function preloadAllTextures(sources) {
+  totalToLoad = sources.length + 1; // +1 for heart model
+  loadedCount = 0;
+  updatePreloadProgress();
+  
+  const loadPromises = sources.map(async (source) => {
+    try {
+      const tex = await textureLoader.loadAsync(source);
+      try { tex.colorSpace = THREE.SRGBColorSpace; } catch (e) {}
+      textureCache.set(source, tex);
+    } catch (err) {
+      console.warn('Failed to preload texture:', source, err);
+    }
+    loadedCount++;
+    updatePreloadProgress();
+  });
+  
+  await Promise.all(loadPromises);
 }
 
 async function createPhotoSpritesFromManifest() {
@@ -405,20 +460,14 @@ async function createPhotoSpritesFromManifest() {
   const maxToCreate = Math.max(12, Math.min(deviceLimit, Math.round(photoSources.length * detailMultiplier)));
   nextPhotoIndex = photoSources.length ? maxToCreate % photoSources.length : 0;
 
-  const readyGoal = Math.min(maxToCreate, Math.max(4, Math.round(maxToCreate * 0.35)));
-  let readyCount = 0;
-  let photosSignaled = readyGoal === 0;
-  if (photosSignaled) markPreloadReady('photos');
+  // PRELOAD ALL TEXTURES FIRST - this prevents stuttering
+  const texturesToPreload = [];
+  for (let i = 0; i < maxToCreate; i++) {
+    texturesToPreload.push(photoSources[i % photoSources.length]);
+  }
+  await preloadAllTextures(texturesToPreload);
 
-  const signalReady = () => {
-    if (photosSignaled) return;
-    readyCount += 1;
-    if (readyCount >= readyGoal) {
-      photosSignaled = true;
-      markPreloadReady('photos');
-    }
-  };
-
+  // Now create sprites with already-loaded textures (instant)
   for (let i = 0; i < maxToCreate; i += 1) {
     const source = photoSources[i % photoSources.length];
     const placeholderMat = new THREE.SpriteMaterial({ color: 0xffffff, transparent: true, depthWrite: false, opacity: 0 });
@@ -442,14 +491,17 @@ async function createPhotoSpritesFromManifest() {
     photoSprites.push(sprite);
     createStarSquare(sprite, baseScale);
 
-    loadSpriteTexture(sprite, source, baseScale)
-      .then(() => signalReady())
-      .catch((err) => {
-        console.warn('Texture load failed:', err);
-        signalReady();
-      });
+    // Apply texture immediately from cache
+    const cachedTex = textureCache.get(source);
+    if (cachedTex) {
+      applyTextureToSprite(sprite, cachedTex, baseScale);
+    }
   }
 
+  // Mark photos as ready
+  markPreloadReady('photos');
+
+  // Texture swapping with cached textures
   if (photoSources.length > photoSprites.length) {
     const SWAP_INTERVAL_MS = 2200;
     setInterval(() => {
@@ -457,24 +509,24 @@ async function createPhotoSpritesFromManifest() {
       const sprite = photoSprites[Math.floor(Math.random() * photoSprites.length)];
       const src = photoSources[nextPhotoIndex % photoSources.length];
       nextPhotoIndex += 1;
-      textureLoader.loadAsync(src)
-        .then((newTex) => {
-          try { newTex.colorSpace = THREE.SRGBColorSpace; } catch (e) {}
-          const oldMap = sprite.material.map;
-          const base = Math.max(sprite.scale.x, sprite.scale.y) || 10;
-          applyTextureToSprite(sprite, newTex, base);
-          try { oldMap?.dispose?.(); } catch (e) {}
-        })
-        .catch((err) => console.warn('Texture swap failed:', err));
+      
+      // Use cached texture if available
+      const cachedTex = textureCache.get(src);
+      if (cachedTex) {
+        const base = Math.max(sprite.scale.x, sprite.scale.y) || 10;
+        applyTextureToSprite(sprite, cachedTex, base);
+      } else {
+        textureLoader.loadAsync(src)
+          .then((newTex) => {
+            try { newTex.colorSpace = THREE.SRGBColorSpace; } catch (e) {}
+            textureCache.set(src, newTex);
+            const base = Math.max(sprite.scale.x, sprite.scale.y) || 10;
+            applyTextureToSprite(sprite, newTex, base);
+          })
+          .catch((err) => console.warn('Texture swap failed:', err));
+      }
     }, SWAP_INTERVAL_MS);
   }
-
-  setTimeout(() => {
-    if (!photosSignaled) {
-      photosSignaled = true;
-      markPreloadReady('photos');
-    }
-  }, 9000);
 }
 
 createPhotoSpritesFromManifest();
@@ -551,9 +603,30 @@ function triggerGalaxyReveal() {
   if (galaxyActivated) return;
   galaxyActivated = true;
   galaxyReveal = 0;
+  
+  // Make galaxy visible and start animation
   galaxyGroup.visible = true;
   galaxyGroup.scale.setScalar(0.05);
+  
+  // Restore full opacity for all sprites (they were hidden after warmup)
+  const len = photoSprites.length;
+  for (let i = 0; i < len; i++) {
+    const sprite = photoSprites[i];
+    if (sprite.material) {
+      sprite.material.opacity = sprite.userData.baseOpacity || 1;
+      sprite.material.needsUpdate = true;
+    }
+    const star = sprite.userData.starSquare;
+    if (star && star.material) {
+      star.material.opacity = 0.85;
+      star.material.needsUpdate = true;
+    }
+  }
+  
   amplifyBurst(1.2);
+  
+  // Play galaxy ambient sound after explosion
+  galaxyAmbient.play().catch(() => {});
 }
 
 function amplifyBurst(multiplier = 1) {
@@ -575,6 +648,11 @@ function easeOutCubic(t) {
 const pulseButton = document.getElementById('pulse-btn');
 let pulseStrength = 0;
 pulseButton?.addEventListener('click', () => {
+  // Play pulse sound (create new instance to allow overlapping)
+  const sound = new Audio('assets/shine-5-268908.mp3');
+  sound.volume = 0.6;
+  sound.play().catch(() => {});
+  
   const now = performance.now();
   pulseStrength = Math.min(pulseStrength + 0.95, 5);
   recentPulseTimes.push(now);
@@ -600,11 +678,61 @@ function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
   
-  // Limitovat delta pro stabilitu při lagách
-  const clampedDelta = Math.min(delta, 0.1);
+  // Limitovat delta pro stabilitu při lagách - menší hodnota = plynulejší animace
+  const clampedDelta = Math.min(delta, 0.033); // Max 30ms = min 30 FPS equivalent
   elapsedTime += clampedDelta;
   frameCount++;
   framesSinceLastFps++;
+  
+  // GPU Warmup phase - render galaxy invisibly to compile shaders
+  if (!warmupComplete && preloadState.heart && preloadState.photos) {
+    warmupFrames++;
+    
+    // Make galaxy visible but transparent for GPU warmup
+    if (!galaxyGroup.visible) {
+      galaxyGroup.visible = true;
+      galaxyGroup.scale.setScalar(1); // Full scale for proper shader compilation
+      
+      // Set all sprites to near-zero opacity for warmup
+      const len = photoSprites.length;
+      for (let i = 0; i < len; i++) {
+        const sprite = photoSprites[i];
+        if (sprite.material) {
+          sprite.material.opacity = 0.01;
+          sprite.material.needsUpdate = true;
+        }
+        const star = sprite.userData.starSquare;
+        if (star && star.material) {
+          star.material.opacity = 0.01;
+          star.material.needsUpdate = true;
+        }
+      }
+    }
+    
+    // Render a few frames to warm up GPU
+    if (warmupFrames >= WARMUP_FRAMES_NEEDED) {
+      warmupComplete = true;
+      
+      // Hide galaxy again until user triggers it
+      galaxyGroup.visible = false;
+      galaxyGroup.scale.setScalar(0.001);
+      
+      // Reset sprite opacities
+      const len = photoSprites.length;
+      for (let i = 0; i < len; i++) {
+        const sprite = photoSprites[i];
+        if (sprite.material) {
+          sprite.material.opacity = 0;
+        }
+        const star = sprite.userData.starSquare;
+        if (star && star.material) {
+          star.material.opacity = 0;
+        }
+      }
+      
+      hidePreloadOverlay(false);
+    }
+  }
   
   // FPS monitoring a adaptivní kvalita
   const now = performance.now();
@@ -679,13 +807,48 @@ function animate() {
   starField.rotation.y += 0.002 * clampedDelta;
   starMaterial.uniforms.time.value = elapsedTime;
 
-  // Sprite aktualizace - throttled na 30 FPS pro lepší výkon
-  const shouldUpdateSprites = (elapsedTime - lastSpriteUpdateTime) >= SPRITE_UPDATE_INTERVAL;
+  // Sprite pozice - KAŽDÝ FRAME pro plynulý pohyb
+  const spritesLen = photoSprites.length;
+  for (let i = 0; i < spritesLen; i++) {
+    const sprite = photoSprites[i];
+    const ud = sprite.userData;
+    
+    // Plynulý orbitální pohyb - vždy aktualizovat
+    ud.angle += ud.speed * cachedPulseBoost * clampedDelta * 60; // Normalize to 60fps
+    const cosAngle = Math.cos(ud.angle);
+    const sinAngle = Math.sin(ud.angle);
+    sprite.position.x = cosAngle * ud.radius;
+    sprite.position.z = sinAngle * ud.radius;
+    sprite.position.y = ud.height + Math.sin(ud.wobblePhase + cachedWobbleTime) * 3;
+    
+    // Star square pozice - synchronizovat s hlavním sprite
+    const square = ud.starSquare;
+    if (square) {
+      const sqData = square.userData;
+      const offsetAngle = sqData.offsetAngleStart + elapsedTime * sqData.offsetSpin;
+      square.position.x = sprite.position.x + Math.cos(offsetAngle) * sqData.offsetRadius;
+      square.position.y = sprite.position.y + sqData.offsetHeight + Math.sin(elapsedTime * 1.7 + sqData.phase) * 0.7;
+      square.position.z = sprite.position.z + Math.sin(offsetAngle) * sqData.offsetRadius;
+    }
+  }
   
-  if (shouldUpdateSprites) {
+  // Secret gift sprite pozice - každý frame
+  if (secretGiftSprite) {
+    const ud = secretGiftSprite.userData;
+    ud.angle += ud.speed * cachedPulseBoost * clampedDelta * 60;
+    const cosAngle = Math.cos(ud.angle);
+    const sinAngle = Math.sin(ud.angle);
+    secretGiftSprite.position.x = cosAngle * ud.radius;
+    secretGiftSprite.position.z = sinAngle * ud.radius;
+    secretGiftSprite.position.y = ud.height + Math.sin(ud.wobblePhase + cachedWobbleTime) * 3;
+  }
+
+  // Méně důležité aktualizace - throttled pro výkon (opacity, velikosti atd.)
+  const shouldUpdateExtras = (elapsedTime - lastSpriteUpdateTime) >= SPRITE_UPDATE_INTERVAL;
+  
+  if (shouldUpdateExtras) {
     lastSpriteUpdateTime = elapsedTime;
-    const spritesLen = photoSprites.length;
-    const lerpFactor = clampedDelta * 2;
+    const lerpFactor = Math.min(0.15, clampedDelta * 3);
     
     for (let i = 0; i < spritesLen; i++) {
       const sprite = photoSprites[i];
@@ -693,19 +856,12 @@ function animate() {
       
       if (galaxyActivated) {
         const targetRadius = ud.targetRadius || ud.baseRadius;
-        ud.radius += (targetRadius - ud.radius) * clampedDelta * (0.8 + explosionBoost);
+        ud.radius += (targetRadius - ud.radius) * lerpFactor;
         const targetOpacity = ud.baseOpacity || 1;
         sprite.material.opacity += (targetOpacity - sprite.material.opacity) * lerpFactor;
       } else {
         sprite.material.opacity = 0;
       }
-      
-      ud.angle += ud.speed * cachedPulseBoost;
-      const cosAngle = Math.cos(ud.angle);
-      const sinAngle = Math.sin(ud.angle);
-      sprite.position.x = cosAngle * ud.radius;
-      sprite.position.z = sinAngle * ud.radius;
-      sprite.position.y = ud.height + Math.sin(ud.wobblePhase + cachedWobbleTime) * 3;
       
       const square = ud.starSquare;
       if (square) {
@@ -714,32 +870,17 @@ function animate() {
         const flickerPhase = elapsedTime * 2.1 + sqData.phase;
         square.material.opacity = visibility * (0.35 + Math.sin(flickerPhase) * 0.3);
         
-        const offsetAngle = sqData.offsetAngleStart + elapsedTime * sqData.offsetSpin;
-        square.position.x = sprite.position.x + Math.cos(offsetAngle) * sqData.offsetRadius;
-        square.position.y = sprite.position.y + sqData.offsetHeight + Math.sin(elapsedTime * 1.7 + sqData.phase) * 0.7;
-        square.position.z = sprite.position.z + Math.sin(offsetAngle) * sqData.offsetRadius;
-        
         const sqSize = sqData.baseSize * (0.85 + Math.sin(elapsedTime * 2.5 + sqData.phase) * 0.18);
         square.scale.setScalar(Math.max(0.6, Math.min(2.0, sqSize)));
       }
     }
     
-    // Animate secret gift sprite (golden star)
-    if (secretGiftSprite) {
+    // Secret gift sprite efekty
+    if (secretGiftSprite && galaxyActivated) {
       const ud = secretGiftSprite.userData;
-      ud.angle += ud.speed * cachedPulseBoost;
-      const cosAngle = Math.cos(ud.angle);
-      const sinAngle = Math.sin(ud.angle);
-      secretGiftSprite.position.x = cosAngle * ud.radius;
-      secretGiftSprite.position.z = sinAngle * ud.radius;
-      secretGiftSprite.position.y = ud.height + Math.sin(ud.wobblePhase + cachedWobbleTime) * 3;
-      
-      // Pulsing glow effect
       ud.glowPhase += clampedDelta * 2;
       const glowIntensity = 0.6 + Math.sin(ud.glowPhase) * 0.4;
       secretGiftSprite.material.opacity = glowIntensity;
-      
-      // Pulsing size
       const pulseSize = ud.baseScale * (0.8 + Math.sin(ud.glowPhase * 1.5) * 0.3);
       secretGiftSprite.scale.setScalar(pulseSize);
     }

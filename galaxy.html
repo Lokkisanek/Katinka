@@ -13,21 +13,17 @@
   <div id="preload-overlay" class="preload">
     <div class="preload__inner">
       <div class="preload__spinner" aria-hidden="true"></div>
-      <p class="preload__label">Načítání..</p>
+      <p class="preload__label">Načítání galaxie...</p>
+      <div class="preload__progress">
+        <div class="preload__progress-bar" id="preloadProgress"></div>
+      </div>
+      <p class="preload__percent" id="preloadPercent">0%</p>
     </div>
   </div>
   <canvas id="galaxy-canvas" aria-label="3D galaxie vzpomínek"></canvas>
 
   <div class="hud">
-    <div class="hud-inner">
-      <p class="eyebrow">Galaktický archiv</p>
-      <h1>Kačenčina galaxie</h1>
-      <p class="lede">Každá fotka je hvězda z našeho života</p>
-      <p class="secret-hint">💫 Najdi skrytou hvězdu s dárkem!</p>
-      <div class="hud-actions">
-        <button id="pulse-btn" type="button">Poslat pulz</button>
-      </div>
-    </div>
+    <button id="pulse-btn" type="button">Poslat pulz</button>
   </div>
 
   <!-- Secret gift star modal -->

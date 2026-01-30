@@ -1,3 +1,58 @@
+/* ===== START OVERLAY ===== */
+.start-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 50%, #6b2d5c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: opacity 500ms ease, visibility 500ms ease;
+}
+
+.start-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.start-content {
+  text-align: center;
+  animation: fadeUp 600ms ease both;
+}
+
+.start-title {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: clamp(3rem, 10vw, 6rem);
+  margin-bottom: 16px;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.3);
+}
+
+.start-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 32px;
+}
+
+.start-btn {
+  background: #fff;
+  color: #c44569;
+  border: none;
+  padding: 16px 48px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+
+.start-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
 /* ===== WRAPPED - Spotify-style full experience ===== */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -263,10 +318,311 @@ body {
   50% { opacity: 1; transform: scale(1.02); }
 }
 
+/* ===== SCATTERED PHOTOS LAYOUT ===== */
+.scattered-layout {
+  position: relative;
+  z-index: 10;
+}
+
+.scattered-photos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.scatter-img {
+  position: absolute;
+  width: 280px;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  animation: fadeUp 600ms ease both;
+  pointer-events: auto;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+.scatter-img:hover {
+  transform: scale(1.08) rotate(0deg) !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  z-index: 20;
+}
+
+.scatter-1 {
+  top: 12%;
+  left: 5%;
+  transform: rotate(-8deg);
+  animation-delay: 400ms;
+}
+
+.scatter-2 {
+  top: 15%;
+  right: 5%;
+  transform: rotate(6deg);
+  animation-delay: 500ms;
+}
+
+.scatter-3 {
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  animation-delay: 600ms;
+}
+
+/* Single image positions */
+.scatter-single {
+  bottom: 12%;
+  right: 10%;
+  transform: rotate(5deg);
+  animation-delay: 400ms;
+}
+
+.scatter-single-right {
+  bottom: 15%;
+  left: 8%;
+  transform: rotate(-6deg);
+  animation-delay: 400ms;
+}
+
+/* Additional scatter positions (4-20) */
+.scatter-4 {
+  bottom: 15%;
+  left: 8%;
+  transform: rotate(4deg);
+  animation-delay: 700ms;
+}
+
+.scatter-5 {
+  bottom: 18%;
+  right: 8%;
+  transform: rotate(-5deg);
+  animation-delay: 800ms;
+}
+
+.scatter-6 {
+  top: 8%;
+  left: 25%;
+  transform: rotate(3deg);
+  animation-delay: 450ms;
+}
+
+.scatter-7 {
+  top: 10%;
+  right: 25%;
+  transform: rotate(-4deg);
+  animation-delay: 550ms;
+}
+
+.scatter-8 {
+  bottom: 25%;
+  left: 3%;
+  transform: rotate(-7deg);
+  animation-delay: 650ms;
+}
+
+.scatter-9 {
+  bottom: 28%;
+  right: 3%;
+  transform: rotate(5deg);
+  animation-delay: 750ms;
+}
+
+.scatter-10 {
+  top: 35%;
+  left: 2%;
+  transform: rotate(-3deg);
+  animation-delay: 500ms;
+}
+
+.scatter-11 {
+  top: 38%;
+  right: 2%;
+  transform: rotate(7deg);
+  animation-delay: 600ms;
+}
+
+.scatter-12 {
+  top: 5%;
+  left: 40%;
+  transform: rotate(-2deg);
+  animation-delay: 420ms;
+}
+
+.scatter-13 {
+  bottom: 5%;
+  left: 20%;
+  transform: rotate(6deg);
+  animation-delay: 720ms;
+}
+
+.scatter-14 {
+  bottom: 5%;
+  right: 20%;
+  transform: rotate(-6deg);
+  animation-delay: 780ms;
+}
+
+.scatter-15 {
+  top: 55%;
+  left: 1%;
+  transform: rotate(4deg);
+  animation-delay: 520ms;
+}
+
+.scatter-16 {
+  top: 58%;
+  right: 1%;
+  transform: rotate(-5deg);
+  animation-delay: 620ms;
+}
+
+.scatter-17 {
+  top: 25%;
+  left: 1%;
+  transform: rotate(8deg);
+  animation-delay: 480ms;
+}
+
+.scatter-18 {
+  top: 22%;
+  right: 1%;
+  transform: rotate(-8deg);
+  animation-delay: 580ms;
+}
+
+.scatter-19 {
+  bottom: 35%;
+  left: 15%;
+  transform: rotate(2deg);
+  animation-delay: 680ms;
+}
+
+.scatter-20 {
+  bottom: 38%;
+  right: 15%;
+  transform: rotate(-2deg);
+  animation-delay: 740ms;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   .slide { padding: 24px 18px; }
   .slide-image img { max-width: 260px; }
   .finale-buttons { flex-direction: column; align-items: center; }
   .wrapped-btn { width: 100%; max-width: 280px; }
+  
+  .scatter-img {
+    width: 100px;
+  }
+  
+  .scatter-1 {
+    top: 8%;
+    left: 3%;
+  }
+  
+  .scatter-2 {
+    top: 10%;
+    right: 3%;
+  }
+  
+  .scatter-3 {
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+  }
+  
+  .scatter-4 {
+    bottom: 12%;
+    left: 5%;
+  }
+  
+  .scatter-5 {
+    bottom: 15%;
+    right: 5%;
+  }
+  
+  .scatter-6 {
+    top: 5%;
+    left: 20%;
+  }
+  
+  .scatter-7 {
+    top: 7%;
+    right: 20%;
+  }
+  
+  .scatter-8 {
+    bottom: 25%;
+    left: 2%;
+  }
+  
+  .scatter-9 {
+    bottom: 28%;
+    right: 2%;
+  }
+  
+  .scatter-10 {
+    top: 30%;
+    left: 1%;
+  }
+  
+  .scatter-11 {
+    top: 33%;
+    right: 1%;
+  }
+  
+  .scatter-12 {
+    top: 3%;
+    left: 35%;
+  }
+  
+  .scatter-13 {
+    bottom: 3%;
+    left: 15%;
+  }
+  
+  .scatter-14 {
+    bottom: 3%;
+    right: 15%;
+  }
+  
+  .scatter-15 {
+    top: 50%;
+    left: 1%;
+  }
+  
+  .scatter-16 {
+    top: 52%;
+    right: 1%;
+  }
+  
+  .scatter-17 {
+    top: 20%;
+    left: 1%;
+  }
+  
+  .scatter-18 {
+    top: 18%;
+    right: 1%;
+  }
+  
+  .scatter-19 {
+    bottom: 32%;
+    left: 12%;
+  }
+  
+  .scatter-20 {
+    bottom: 35%;
+    right: 12%;
+  }
+  
+  .scatter-single {
+    bottom: 8%;
+    right: 5%;
+  }
+  
+  .scatter-single-right {
+    bottom: 10%;
+    left: 5%;
+  }
 }

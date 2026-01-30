@@ -16,6 +16,15 @@
     <!-- TIP: Pro každou sekci můžeš nastavit song přes atributy data-song, data-song-title a data-autoplay -->
     <!-- Pro více fotek / videí vlož dovnitř .slide-content blok .slide-gallery a duplikuj jednotlivé <figure> -->
 
+    <!-- Start overlay - user must click to enable audio -->
+    <div class="start-overlay" id="startOverlay">
+      <div class="start-content">
+        <h1 class="start-title">Náš Wrapped</h1>
+        <p class="start-subtitle">Připrav se na naši cestu vzpomínkami...</p>
+        <button class="start-btn" id="startBtn">▶ Spustit</button>
+      </div>
+    </div>
+
     <!-- Slide 0: Intro -->
     <section class="slide" data-index="0" data-bg="gradient-pink" data-song="assets/songs-edited/song1.mp3" data-song-title="" data-autoplay="true">
       <div class="slide-content">
@@ -28,56 +37,85 @@
 
     <!-- Slide 1: Opening -->
     <section class="slide" data-index="1" data-bg="gradient-purple" data-song="assets/songs-edited/song2.mp3" data-song-title="" data-autoplay="true">
-      <div class="slide-content">
+      <div class="slide-content scattered-layout">
         <p class="eyebrow">Vše to začalo</p>
         <h1 class="big-title">3. Dubna 2025</h1>
         <p class="subtitle">Ten den, kdy jsem ti poprvé napsal.</p>
         <p class="subtitle">Víš co byla naše první zpráva?</p>
-        <img src="assets/wrapped-photos/message.gif" alt="my" style="width: 50%;" />
+      </div>
+      <div class="scattered-photos">
+        <img src="assets/wrapped-photos/480DC1D6-5A4F-46B0-95B5-7B33A28A0CD0.JPG" alt="další moment" class="scatter-img scatter-1" />
+        <img src="assets/wrapped-photos/fotka1.jpg" alt="další moment" class="scatter-img scatter-2" />
+        <img src="assets/wrapped-photos/IMG_2948.webp" alt="další moment" class="scatter-img scatter-3" />
       </div>
     </section>
 
     <!-- Slide 2: Timer section -->
     <section class="slide" data-index="2" data-bg="gradient-blue" data-song="assets/songs-edited/song3.mp3" data-song-title="" data-autoplay="true">
-      <div class="slide-content">
+      <div class="slide-content scattered-layout">
         <p class="eyebrow">A pak to vše začalo</p>
         <h1 class="big-title">29. Dubna 2025</h1>
         <p class="subtitle">Jsme spolu začli chodit.</p>
         <p class="subtitle">Víš jak jsem se tě na to zeptal?</p>
+      </div>
+      <div class="scattered-photos">
+        <img src="assets/wrapped-photos/IMG_9039.webp" alt="další moment" class="scatter-img scatter-1" />
+        <img src="assets/wrapped-photos/IMG_4130-ezgif.com-video-to-gif-converter.gif" alt="další moment" class="scatter-img scatter-2" />
+        <img src="assets/wrapped-photos/IMG_4102-ezgif.com-video-to-gif-converter.gif" alt="další moment" class="scatter-img scatter-3" />
+        <img src="assets/photos-new/IMG_8122.webp" alt="další moment" class="scatter-img scatter-4" />
+         <img src="assets/photos-new/IMG_0685.webp" alt="další moment" class="scatter-img scatter-5" />
+      </div>
 
-              <img src="assets/wrapped-photos/couple.gif" alt="my" style="width: 50%;" />
       </div>
     </section>
 
     <!-- Slide 3: Custom section 1 -->
     <section class="slide" data-index="3" data-bg="gradient-teal" data-song="assets/songs-edited/song4.mp3" data-song-title="" data-autoplay="true">
-      <div class="slide-content">
+      <div class="slide-content scattered-layout">
         <p class="eyebrow">Od té doby uplynulo</p>
         <h1 class="big-title" id="timerDisplay">—</h1>
         <p class="subtitle">
           A i když to někdy bylo těžké, každý den s tebou stojí za to.
         </p>
       </div>
+       <div class="scattered-photos">
+        <img src="assets/wrapped-photos/6558E0C3-2E46-4503-BB1E-8A71B08124C6.JPG" alt="další moment" class="scatter-img scatter-1" />
+        <img src="assets/wrapped-photos/364adb7affd84e6599dbfcd7ceadae23-ezgif.com-video-to-gif-converter.gif" alt="další moment" class="scatter-img scatter-2" />
+        <img src="assets/wrapped-photos/IMG_9835.jpg" alt="další moment" class="scatter-img scatter-3" />
+        <img src="assets/photos-new/IMG_0305.webp" alt="další moment" class="scatter-img scatter-19" />
+        <img src="assets/photos-new/IMG_0691.webp" alt="další moment" class="scatter-img scatter-14" />
+      </div>
     </section>
 
     <!-- Slide 4: Custom section 2 -->
     <section class="slide" data-index="4" data-bg="gradient-orange" data-song="assets/songs-edited/song5.mp3" data-song-title="" data-autoplay="true">
-      <div class="slide-content">
+      <div class="slide-content scattered-layout">
         <p class="eyebrow">Co mě na tobě baví</p>
         <h1 class="big-title">Tvůj úsměv, to jak jsi hodná ale hlavně, to jaká jsi DIVA!</h1>
-
+      </div>
+      <div class="scattered-photos">
+        <img src="assets/wrapped-photos/f9d6596c4f624b35adaa100660703ec4-ezgif.com-video-to-gif-converter.gif" alt="další moment" class="scatter-img scatter-1" />
+        <img src="assets/wrapped-photos/IMG_4275.jpg" alt="další moment" class="scatter-img scatter-2" />
+        <img src="assets/wrapped-photos/Snímek obrazovky 2026-01-29 063944.png" alt="další moment" class="scatter-img scatter-3" />
+        <img src="assets/wrapped-photos/IMG_4600.png" alt="další moment" class="scatter-img scatter-4" />
+        <img src="assets/wrapped-photos/Snímek obrazovky 2026-01-29 063853.png" alt="další moment" class="scatter-img scatter-5" />
       </div>
     </section>
 
 
     <!-- Slide 6: Looking forward -->
     <section class="slide" data-index="6" data-bg="gradient-purple-dark" data-song="assets/songs-edited/song6.mp3" data-song-title="" data-autoplay="true">
-      <div class="slide-content">
+      <div class="slide-content scattered-layout">
         <p class="eyebrow">Partyyy!!!</p>
         <h1 class="big-title">Byli jsme spolu i na několika nezapomenutelných akcích</h1>
-        <img src="assets/wrapped-photos/IMG_0503.webp" alt="další moment" />
-        <img src="assets/wrapped-photos/IMG_0506.webp" alt="další moment" />
-        <img src="assets/wrapped-photos/IMG_0508.webp" alt="další moment" />
+      </div>
+      <div class="scattered-photos">
+        <img src="assets/wrapped-photos/IMG_0503.webp" alt="další moment" class="scatter-img scatter-1" />
+        <img src="assets/wrapped-photos/IMG_0506.webp" alt="další moment" class="scatter-img scatter-2" />
+        <img src="assets/wrapped-photos/IMG_0508.webp" alt="další moment" class="scatter-img scatter-3" />
+         <img src="assets/wrapped-photos/IMG_5211.PNG" alt="další moment" class="scatter-img scatter-4" />
+        <img src="assets/wrapped-photos/IMG_0697.JPEG" alt="další moment" class="scatter-img scatter-5" />
+        <img src="assets/wrapped-photos/82E43FBE-708B-447A-A10D-475899228879.JPG" alt="další moment" class="scatter-img scatter-6" />
       </div>
     </section>
 
@@ -89,7 +127,7 @@
         <p class="subtitle">Díky, že jsi.</p>
         <div class="finale-buttons">
           <button id="replay" class="wrapped-btn">Přehrát znovu</button>
-          <a href="gift1.html" class="wrapped-btn secondary">🎁 Otevřít dárek</a>
+          <a href="gift3.html" class="wrapped-btn secondary">🎁 Otevřít dárek</a>
         </div>
       </div>
     </section>

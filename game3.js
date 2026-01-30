@@ -46,7 +46,7 @@ function initPuzzle() {
       tileImage.className = 'tile-image';
       tileImage.style.backgroundImage = `url('${config.imageSource}')`;
       tileImage.style.backgroundSize = `${config.columns * 100}% ${config.rows * 100}%`;
-      tileImage.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+      tileImage.style.backgroundPosition = `${(col / (config.columns - 1)) * 100}% ${(row / (config.rows - 1)) * 100}%`;
       tile.appendChild(tileImage);
     }
     
@@ -175,9 +175,9 @@ function showWin() {
 }
 
 // Event listeners
-shuffleBtn.addEventListener('click', shuffle);
+shuffleBtn?.addEventListener('click', shuffle);
 
-playAgainBtn.addEventListener('click', () => {
+playAgainBtn?.addEventListener('click', () => {
   winModal.classList.remove('show');
   initPuzzle();
   shuffle();

@@ -147,7 +147,17 @@ giftBox.addEventListener('click', (e) => {
   }
 });
 
+let soundPlayed = false;
+
 function openGift() {
+  // Play confetti sound only once
+  if (!soundPlayed) {
+    soundPlayed = true;
+    const confettiSound = new Audio('assets/1gift-confetti-447240.mp3');
+    confettiSound.volume = 0.7;
+    confettiSound.play().catch(() => {});
+  }
+  
   // Open lid animation
   giftLid.classList.add('open');
   

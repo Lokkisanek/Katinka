@@ -272,4 +272,14 @@ if (btnClose) {
 }
 
 // ===== Initialize =====
-showSlide(0);
+const startOverlay = document.getElementById('startOverlay');
+const startBtn = document.getElementById('startBtn');
+
+if (startOverlay && startBtn) {
+  startBtn.addEventListener('click', () => {
+    startOverlay.classList.add('hidden');
+    showSlide(0);
+  });
+} else {
+  showSlide(0);
+}
